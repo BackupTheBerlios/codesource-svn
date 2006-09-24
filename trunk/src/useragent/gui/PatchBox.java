@@ -1,0 +1,185 @@
+package useragent.gui;
+
+import jade.core.Agent;
+
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import useragent.senderbehaviour.PatchSender;
+import content.PatchContent;
+import java.awt.Dimension;
+
+public class PatchBox extends JDialog implements ActionListener
+{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	GridLayout msglayout = new GridLayout(2, 0);
+
+	private String m_msg = null;
+
+	private String m_snipname = null;
+
+	private String m_jadeid = null;
+
+	private String m_sender = null;
+
+	private Agent m_agent = null;
+
+	private JPanel jpnlMain = null;
+
+	private JLabel jlblMsg = null;
+
+	private JButton jbtnOk = null;
+
+	private JTextField jtxtData = null;
+
+	public PatchBox(String msg, Agent agent, String dest, String snipname,
+			String username)
+	{
+		// super();
+
+		m_msg = msg;
+		m_agent = agent;
+		m_snipname = snipname;
+		m_jadeid = dest;
+		m_sender = username;
+
+		initialize();
+
+		try
+		{
+			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		} catch (Exception exception)
+		{
+			exception.printStackTrace();
+		}
+	}
+
+	/**
+	 * Component initialization.
+	 * 
+	 * @throws java.lang.Exception
+	 */
+	private void initialize()
+	{
+		setResizable(false);
+		this.setPreferredSize(new Dimension(242, 106));
+		this.setContentPane(getJpnlMain());
+		jbtnOk.grabFocus();
+	}
+
+	/**
+	 * Close the dialog on a button event.
+	 * 
+	 * @param actionEvent
+	 *            ActionEvent
+	 */
+	public void actionPerformed(ActionEvent actionEvent)
+	{
+		if (actionEvent.getSource() == jbtnOk)
+		{
+			PatchContent pc = new PatchContent();
+			pc.newPatch(m_snipname, m_sender);
+
+			try
+			{
+				BufferedReader file = new BufferedReader(new FileReader(
+						jtxtData.getText()));
+				String inputLine = null;
+
+				while ((inputLine = file.readLine()) != null)
+				{
+					pc.appendLine(inputLine + "\n");
+				}
+			} catch (FileNotFoundException ex)
+			{
+
+			} catch (IOException ex)
+			{
+			}
+
+			PatchSender ps = new PatchSender(pc, m_jadeid);
+			m_agent.addBehaviour(ps);
+
+			dispose();
+		}
+	}
+
+	/**
+	 * This method initializes jpnlMain
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJpnlMain()
+	{
+		if (jpnlMain == null)
+		{
+			GridLayout gridLayout = new GridLayout();
+			gridLayout.setRows(3);
+			gridLayout.setColumns(1);
+			jlblMsg = new JLabel();
+			jlblMsg.setText(m_msg);
+			jpnlMain = new JPanel();
+			jpnlMain.setLayout(gridLayout);
+			jpnlMain.add(jlblMsg, null);
+			jpnlMain.add(getJtxtData2(), null);
+			jpnlMain.add(getJbtnOk(), null);
+			jpnlMain.add(getJtxtData(), null);
+			jpnlMain.add(getJbtnOk(), null);
+		}
+		return jpnlMain;
+	}
+
+	private JButton getJtxtData()
+	{
+		if (jtxtData == null)
+		{
+			jtxtData.addActionListener(this);
+		}
+		return jbtnOk;
+	}
+
+	/**
+	 * This method initializes jbtnOk
+	 * 
+	 * @return javax.swing.JButton
+	 */
+	private JButton getJbtnOk()
+	{
+		if (jbtnOk == null)
+		{
+			jbtnOk = new JButton();
+			jbtnOk.setText("OK");
+			jbtnOk.addActionListener(this);
+		}
+		return jbtnOk;
+	}
+
+	/**
+	 * This method initializes jtxtData
+	 * 
+	 * @return javax.swing.JTextField
+	 */
+	private JTextField getJtxtData2()
+	{
+		if (jtxtData == null)
+		{
+			jtxtData = new JTextField();
+		}
+		return jtxtData;
+	}
+} // @jve:decl-index=0:visual-constraint="10,10"
